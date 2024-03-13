@@ -1,0 +1,80 @@
+int LEDG = 5; //綠色
+int LEDR = 6; //紅色
+int inPin1 = 7; //按鈕1
+int inPin2 = 8; //按鈕2
+int val1;
+int val2;
+int delayval = 100;
+int LEDG_temp = LOW;
+boolean inPin2_temp = false;
+
+//按第一個按鈕一下，LED由綠色轉紅色，再按一下LED由紅色轉綠色
+//按第二個按鈕一下，LED由慢速轉快速，再按一下LED由快速轉慢速
+
+void setup() {
+  Serial.begin(9600);
+ pinMode(LEDG, OUTPUT);
+ pinMode(LEDR, OUTPUT);
+ pinMode(inPin1, INPUT);
+ pinMode(inPin2, INPUT);
+}
+
+void loop() {
+  val1 = digitalRead(inPin1);
+  val2 = digitalRead(inPin2);
+
+  if(val1==LOW && val2==LOW){
+       digitalWrite(LEDR, LOW);
+       delay(500);
+       
+       digitalWrite(LEDG, HIGH);
+       delay(500);
+    
+       digitalWrite(LEDG, LOW);
+       delay(500);
+  }
+  
+
+  //沒按是LOW 按是HIGH
+  
+  if(val1==HIGH && val2==LOW ){
+    //按一下
+    //Serial.println("111");
+     
+     if(LEDG_temp == LOW){
+       digitalWrite(LEDG, HIGH); //
+       delay(500);
+       digitalWrite(LEDR, LOW);
+       delay(500);
+       LEDG_temp = HIGH;
+      }
+   //再按一下
+    else{
+       digitalWrite(LEDG, LOW);
+       delay(500);
+       digitalWrite(LEDR, HIGH);
+       delay(500);
+       LEDG_temp = LOW;
+    }
+    
+  }
+  else if(val1==HIGH && val2==LOW){
+    //按一下，慢變快
+    if(inPin2_temp == false){
+       digitalWrite(LEDG, HIGH); 
+       delay(500);
+       digitalWrite(LEDR, LOW);
+       delay(100);
+       
+      }
+   //再按一下，快變慢
+    else{
+       digitalWrite(LEDG, LOW);
+       delay(100);
+       digitalWrite(LEDR, HIGH);
+       delay(500);
+       
+    }
+  }
+  
+}
