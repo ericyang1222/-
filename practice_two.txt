@@ -1,0 +1,69 @@
+int LEDG = 5; // 綠色LED連接的腳位
+int LEDR = 6; // 紅色LED連接的腳位
+int inPin1 = 7; // 按鈕1連接的腳位
+int inPin2 = 8; // 按鈕2連接的腳位
+
+// 狀態變量
+bool ledState = LOW; // 當前LED的狀態，初始為LOW
+bool colorState = HIGH; // 當前顏色的狀態，HIGH為綠色，LOW為紅色
+bool speedState = LOW; // 當前閃爍速度的狀態，LOW為慢速，HIGH為快速
+
+// 延遲值
+int slowSpeed = 1000; // 慢速閃爍的延遲時間（毫秒）
+int fastSpeed = 200; // 快速閃爍的延遲時間（毫秒）
+int currentDelay = slowSpeed; // 當前設置的延遲時間
+
+// 按鈕狀態和前一次狀態記錄
+int button1State = LOW;
+int lastButton1State = LOW;
+int button2State = LOW;
+int lastButton2State = LOW;
+
+void setup() {
+  pinMode(LEDG, OUTPUT);
+  pinMode(LEDR, OUTPUT);
+  pinMode(inPin1, INPUT);
+  pinMode(inPin2, INPUT);
+}
+
+void loop() {
+  // 讀取按鈕狀態
+  button1State = digitalRead(inPin1);
+  button2State = digitalRead(inPin2);
+
+  // 按鈕1邊緣觸發檢測（顏色切換）
+  if (button1State == HIGH && lastButton1State == LOW) {
+    // 切換顏色狀態
+    colorState = !colorState;
+    delay(50); // 為了消除按鈕抖動
+  }
+
+  // 按鈕2邊緣觸發檢測（速度切換）
+  if (button2State == HIGH && lastButton2State == LOW) {
+    // 切換閃爍速度狀態
+    speedState = !speedState;
+    currentDelay = (speedState == HIGH) ? fastSpeed : slowSpeed;
+    delay(50); // 為了消除按鈕抖動
+  }
+
+  // 記錄這一次的按鈕狀態，用於下一次循環的邊緣觸發檢測
+  lastButton1State = button1State;
+  lastButton2State = button2State;
+
+  // 根據當前顏色和閃爍速度狀態更新LED
+  if (colorState == HIGH) {
+    // 綠色LED
+    digitalWrite(LEDG, ledState);
+    digitalWrite(LEDR, LOW);
+  } else {
+    // 紅色LED
+    digitalWrite(LEDR, ledState);
+    digitalWrite(LEDG, LOW);
+  }
+
+  // 切換LED狀態（閃爍）
+  ledState = !ledState;
+
+  // 根據當前延遲時間等待
+  delay(currentDelay);
+}
