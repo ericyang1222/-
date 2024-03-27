@@ -1,0 +1,107 @@
+#include <Servo.h>
+Servo servo1;
+Servo servo2;
+int speakerPin = 3;
+int ledPin = 2; 
+
+void setup()
+{
+ pinMode(speakerPin, OUTPUT);
+ pinMode(ledPin, OUTPUT);
+ servo1.attach(12);
+ servo2.attach(13);
+ Serial.begin(9600);
+}
+ 
+void loop()
+{
+   char c;
+   if (Serial.available () > 0) //判斷是否有資料傳入
+  {
+     c = Serial.read(); // save character to variable c
+    switch (c) 
+    {
+       case '1':  //前進
+         forward(1000); 
+         break;
+       case '2':  //後退
+         backward(400); 
+         break;
+       case '3':  //右轉前進
+         trunRight(400); 
+         forward(1000);
+         break;
+       case '4':  //左轉前進
+         trunLeft(400); 
+         forward(1000); 
+         break;
+       case '5':  //右轉後退
+         trunRight(400);
+         backward(400); 
+         break;
+       case '6':  //左轉後退
+         trunLeft(400); 
+         backward(400); 
+         break;
+       case '7':  //車子前進+LED閃爍
+         forward(1000);
+         ledLight(ledPin);  
+         break;
+       case '8': //車子前進+蜂鳴器發出聲響(兩音交互響)
+         forward(1000);
+         Speaker(speakerPin); 
+         break;
+       case '9':  //車子前進+LED閃爍+蜂鳴器發出聲響
+         forward(1000);
+         ledLight(ledPin);
+         Speaker(speakerPin);  
+         break;
+       case '0':  //停止
+         bestop(400); 
+         break;
+    }
+  }
+}
+void backward(int time){ //後退的副程式
+ servo1.write(1300);
+ servo2.write(1700);
+ delay(time); 
+}
+ 
+void trunRight(int time){ //右轉的副程式
+ servo1.write(1700);
+ servo2.write(1700);
+ delay(time); 
+}
+ 
+void trunLeft(int time){ //左轉的副程式
+ servo1.write(1300);
+ servo2.write(1300);
+ delay(time); 
+}
+ 
+void forward(int time){ //前進的副程式
+ servo1.write(1700);
+ servo2.write(1300);
+ delay(time); 
+}
+ 
+void bestop(int time){ //停止的副程式
+ servo1.write(1500);
+ servo2.write(1500);
+ delay(time); 
+}
+
+void ledLight(int led){ //LED閃爍的副程式
+  digitalWrite(led, HIGH);
+  delay(200);
+  digitalWrite(led, LOW);
+  delay(200);
+}
+
+void Speaker(int speaker){
+  tone(speaker, 294, 250);
+  delay(200);
+  tone(speaker, 330, 250);
+  delay(200);
+}
