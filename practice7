@@ -1,0 +1,62 @@
+/*#define CS_PIN  10  // 晶片的選擇腳位，送進高訊號至這個腳位，則這個晶片會忽視所有CLK 和U/D所接收到的訊號，如果送進低訊號，那就會接收所有的控制訊號*/
+#define CLK_PIN 8  // 這個腳位接收時脈(低高低訊號)來移動電刷端(W1)
+#define UD_PIN  7  // 這個腳位接收高訊號讓(W1)端朝A1 移動，並且接收低訊號讓它朝B1 移動，這個腳位只是設定方向，W1 端必須在CLK 接收到脈衝(高低高訊號)才會開始移動
+
+#define LDR1_PIN A0  // 第一顆光敏電阻
+#define LDR2_PIN A1  // 第二顆光敏電阻
+
+// 初始化AD5220的位置（中間值）
+int resistancePosition = 50; 
+int minLight = 100; //最小光源門檻值
+
+void setup() {
+  // 初始化腳位模式
+  //pinMode(CS_PIN, OUTPUT);
+  Serial.begin(9600);
+  pinMode(CLK_PIN, OUTPUT);
+  pinMode(UD_PIN, OUTPUT);
+   digitalWrite(UD_PIN, LOW);
+
+  setAD5220(resistancePosition);
+}
+
+void loop() {
+  digitalWrite(UD_PIN, HIGH);
+  
+  int ldr1Value = analogRead(LDR1_PIN); //讀取光敏電阻值
+  int ldr2Value = analogRead(LDR2_PIN);
+
+  /*Serial.println(ldr1Value);
+  Serial.println(ldr2Value);*/
+  // 判斷光敏電阻是否遮光
+  if (ldr1Value < minLight && ldr2Value < minLight) {
+    resistancePosition = 100; // 兩個LDR同時遮光，設置最大值
+    setAD5220(resistancePosition);
+  }
+  else if (ldr1Value < minLight) {
+    if (resistancePosition < 100) {
+      resistancePosition++;
+      setAD5220(resistancePosition);
+    }
+  } 
+  else if (ldr2Value < minLight) {
+    if (resistancePosition > 0) {
+      resistancePosition--;
+      setAD5220(resistancePosition);
+    }
+  } 
+  delay(100);
+}
+
+void setAD5220(int position) {
+    digitalWrite(UD_PIN, position > resistancePosition ? HIGH : LOW); // 根據目標位置跟上一次位置比較來設置方向
+    int steps = abs(position - resistancePosition); // 需要移動多少
+    for (int i = 0; i < steps; i++) {
+        digitalWrite(CLK_PIN, HIGH);
+        delayMicroseconds(2); 
+        digitalWrite(CLK_PIN, LOW);
+        delay(20);
+    }
+    resistancePosition = position; 
+}
+
